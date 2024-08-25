@@ -1,13 +1,12 @@
 'use strict';
 const { v4: uuidv4 } = require('uuid');
 
-
 module.exports = function (app) {
   const issues = {};
 
   app.route('/api/issues/:project')
   
-    .get(function (req, res){
+    .get(function (req, res) {
       let project = req.params.project;
       const filters = req.query;
 
@@ -88,10 +87,17 @@ module.exports = function (app) {
         open: req.body.open
       };
     
+      let noFieldsToUpdate = true;
+
       for (let key in updates) {
         if (updates[key] !== undefined) {
           issue[key] = updates[key];
+          noFieldsToUpdate = false;
         }
+      }
+
+      if (noFieldsToUpdate) {
+        return res.status(400).json({ error: 'no update field(s) sent', _id: issueId });
       }
     
       issue.updated_on = new Date().toISOString();
@@ -121,5 +127,4 @@ module.exports = function (app) {
         return res.status(404).json({ error: 'issue not found', id: issueId });
       }
     });
-    
 };
